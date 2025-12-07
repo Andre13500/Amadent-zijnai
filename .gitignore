@@ -1,0 +1,83 @@
+# ============================================
+# ARCHIVOS DE CODE::BLOCKS
+# ============================================
+*.cbp
+*.depend
+*.layout
+*.workspace
+*.tags
+
+# ============================================
+# ARCHIVOS DE COMPILACIÓN Y EJECUTABLES
+# ============================================
+*.exe
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dll
+*.out
+*.ilk
+*.pdb
+*.idb
+*.pch
+*.sbr
+*.ipch
+
+# ============================================
+# DIRECTORIOS DE COMPILACIÓN
+# ============================================
+build/
+Debug/
+Release/
+bin/
+obj/
+.xcodeproj/
+.vs/
+out/
+dist/
+__pycache__/
+
+# ============================================
+# ARCHIVOS TEMPORALES Y DEL SISTEMA
+# ============================================
+*~
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# ============================================
+# ARCHIVOS DE LOG Y DATOS
+# ============================================
+*.log
+*.tmp
+*.temp
+*.pid
+
+# ============================================
+# ARCHIVOS DE BACKUP
+# ============================================
+*.bak
+*.backup
+*.old
+
+# ============================================
+# PROYECTO ESPECÍFICO
+# ============================================
+# Si tienes estos en tu proyecto Amadent:
+/bin/
+/obj/
+/output/
+
+# ============================================
+# EXCEPCIONES (si necesitas algo específico)
+# ============================================
+# !README.md        # Descomenta si README.md está siendo ignorado
+# !.gitignore       # Descomenta si .gitignore se ignora a sí mismo

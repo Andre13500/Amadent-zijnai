@@ -49,9 +49,12 @@ int leer_opcion(){
 
 
 }
-
-
-
 //herramienta para escribir en un archivo
 
+	void salida(){
+		//Exit del programa
+		printf("\nEl programa ha finalizado");
+		exit(0);
 
+		
+	}

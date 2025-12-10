@@ -18,12 +18,17 @@ typedef struct {
  char email [100];
  int edad;
  char cedula[10];
+ char contrasena[10];
 
 
 }datos_registro;
 void escribir_archivo(void);
 void pantalla_registro(void);
 void mostrar_contenido_archivo(void);
+
+
+void pantalla_pacientes(void);
+
 
 
 

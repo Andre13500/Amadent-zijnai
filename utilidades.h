@@ -10,7 +10,7 @@ int leer_opcion(void); //permite que la opcion ingresada valide solo numeros (ut
 void continuar(void);
 
 
-
+void salida(void);
 
 
 #endif // LOGINUTILS_H_INCLUDED

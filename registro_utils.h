@@ -29,6 +29,7 @@ void mostrar_contenido_archivo(void);
 
 void pantalla_pacientes(void);
 
+//para las validaciones de las fechas que esten en un rango y su rango es segun su formato 
 
 
 

@@ -177,3 +177,5 @@ void limpiar_buffer_entrada(void) {
 	int c;
 	while ((c = getchar()) != '\n' && c != EOF);
 }
+
+

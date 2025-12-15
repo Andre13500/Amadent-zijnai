@@ -5,15 +5,27 @@
 #include "registro_utils.h"
 #include "utilidades.h"
 #include "validaciones.h"
+#include "citas.h"
 
-void pantalla_pacientes(){
-	system("cls");
-	printf("========================================\n");
-	printf("        MENÚ DE PACIENTES\n");
-	printf("========================================\n");
-	printf("¡Hola! Has ingresado al sistema.\n\n");
-	// Aquí puedes agregar las funcionalidades del menú de pacientes
-	continuar();
+
+void pantalla_pacientes() {
+	int opcion;
+	
+	do {
+		system("cls");
+		printf("======= MENÚ PACIENTE =======\n");
+		printf("1. Agendar cita\n");
+		printf("2. Salir\n");
+		printf("Seleccione una opción: ");
+		scanf("%d", &opcion);
+		limpiar_buffer_entrada();
+		
+		switch (opcion) {
+		case 1:
+			menu_citas(0);  // luego pasas el ID real
+			break;
+		}
+	} while (opcion != 2);
 }
 	
 	// Función para obtener el último ID automáticamente
@@ -183,6 +195,7 @@ void pantalla_pacientes(){
 		printf("Nombre: %s\n", nuevo_usuario.nombre);
 		printf("Email: %s\n", nuevo_usuario.email);
 		printf("Cédula: %s\n", nuevo_usuario.cedula);
+		printf("Contrasena: %s\n", nuevo_usuario.contrasena);
 		printf("========================================\n\n");
 		
 		// Confirmar registro

@@ -14,10 +14,10 @@ int opcion_menu1 = 0;
     system("cls");
     printf("========AMADENT========\n");
     printf("1.Iniciar sesion\n");
-    printf("3.Salir \n");
+    printf("2.Salir \n");
     printf("Seleccione una opcion: ");
 
-    opcion_menu1 = leer_opcion();
+    opcion_menu1 = leer_opcion(1,2);
 
 
 
@@ -28,7 +28,7 @@ int opcion_menu1 = 0;
 
     case 1:
 		system("cls");
-		pantalla_registro();
+		iniciarSesion();
 		pausar();
 		break;
 
@@ -42,8 +42,8 @@ int opcion_menu1 = 0;
     }
 
 
-}while(opcion_menu1 != 3);
+}while(opcion_menu1 != 2);
 
 
-
+return 0;
 }

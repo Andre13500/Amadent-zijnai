@@ -2,23 +2,17 @@
 #define REGISTRO_UTILS_H_INCLUDED
 
 
-typedef enum{
- Paciente,
- Administrador,
- Medico
-
-
-}tipo_usuario;
 
 //estructura que define los datos de los usuarios
 typedef struct {
 
-  int id_paciente;
+  char userName[100];
  char nombre [100];
  char email [100];
  int edad;
- char cedula[10];
+ char cedula[11];
  char contrasena[10];
+ int tipo_usuario;
 
 
 }datos_registro;

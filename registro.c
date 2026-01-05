@@ -1,278 +1,307 @@
-#include <stdio.h>
-#include <string.h>
+#include <stdio.h> 
 #include <stdlib.h>
-#include <ctype.h>
 #include "registro_utils.h"
 #include "utilidades.h"
-#include "validaciones.h"
-#include "citas.h"
+#include <string.h>
+#include <ctype.h>
+#include "modulos.h"
+#include <time.h>  // <-- AGREGA ESTA LÍNEA
+void iniciarSesion();
+void pantalla_registro();
+
+datos_registro datos;
+int correo_detector;
 
 
-void pantalla_pacientes() {
-	int opcion;
+char email_logueado[100];
+void limpiarSaltoLinea(char cadena[]) {
+	cadena[strcspn(cadena, "\n")] = '\0';
+}
+
+
+void iniciarSesion() {
+	datos_registro temp;
+	char linea[150];
+	FILE *archivo;
+	int encontrado = 0;
 	
+	archivo = fopen("registro.txt", "r");
+	
+	// Si no existe el archivo ? registrar directo
+	if (archivo == NULL) {
+		pantalla_registro();
+		return;
+	}
+	
+	// PEDIR EMAIL
 	do {
-		system("cls");
-		printf("======= MENÚ PACIENTE =======\n");
-		printf("1. Agendar cita\n");
-		printf("2. Salir\n");
-		printf("Seleccione una opción: ");
-		scanf("%d", &opcion);
-		limpiar_buffer_entrada();
+		printf("Ingrese su email: ");
+		fgets(datos.email, sizeof(datos.email), stdin);
+		limpiarSaltoLinea(datos.email);
+		correo_detector = deteccion_correo(datos.email);
+	} while (correo_detector == 0);
+	
+	// PEDIR CONTRASEÑA
+	printf("Ingrese su contraseña: ");
+	fgets(datos.contrasena, sizeof(datos.contrasena), stdin);
+	limpiarSaltoLinea(datos.contrasena);
+	
+	// BUSCAR EN ARCHIVO
+	while (fgets(linea, sizeof(linea), archivo)) {
+		sscanf(linea, "%*[^;];%[^;];%[^;];%*d;%*[^;];%d",
+			   temp.email,
+			   temp.contrasena,
+			   &temp.tipo_usuario);
 		
-		switch (opcion) {
-		case 1:
-			menu_citas(0);  // luego pasas el ID real
+		if (strcmp(datos.email, temp.email) == 0 &&
+			strcmp(datos.contrasena, temp.contrasena) == 0) {
+			encontrado = 1;
 			break;
 		}
-	} while (opcion != 2);
-}
-	
-	// Función para obtener el último ID automáticamente
-	int obtener_ultimo_id(void) {
-		FILE *archivo;
-		datos_registro usuario;
-		int ultimo_id = 0;
-		
-		archivo = fopen("Registros_usuarios.dat", "rb");
-		if (archivo == NULL) {
-			return 0; // Si el archivo no existe, empezamos desde 0
-		}
-		
-		while (fread(&usuario, sizeof(datos_registro), 1, archivo)) {
-			if (usuario.id_paciente > ultimo_id) {
-				ultimo_id = usuario.id_paciente;
-			}
-		}
-		
-		fclose(archivo);
-		return ultimo_id;
 	}
 	
-	void pantalla_registro(void) {
-		FILE *archivo;
-		datos_registro usuario;
-		datos_registro usuario_ingresado;
-		int encontrado = 0;
-		char opcion_registro;
-		
-		system("cls");
-		printf("\n========================================\n");
-		printf("        INICIO DE SESION\n");
-		printf("========================================\n\n");
-		
-		// Solicitar email
-		printf("Ingrese su correo: ");
-		fgets(usuario_ingresado.email, 100, stdin);
-		usuario_ingresado.email[strcspn(usuario_ingresado.email, "\n")] = 0;
-		
-		// Validar email
-		while (!validar_email(usuario_ingresado.email)) {
-			printf("Email no válido. Ingrese un email válido (ejemplo@dominio.com): ");
-			fgets(usuario_ingresado.email, 100, stdin);
-			usuario_ingresado.email[strcspn(usuario_ingresado.email, "\n")] = 0;
+	fclose(archivo);
+	
+	// DECISIÓN FINAL
+	if (encontrado) {
+		printf("\nSesion iniciada correctamente\n");
+		pausar();
+		switch (temp.tipo_usuario) {
+		case 1:
+			modulo_paciente(datos.email);
+			break;
+		case 2:
+			modulo_medico(datos.email);
+			break;
+		case 3:
+			modulo_administrador(datos.email);
+			break;
 		}
 		
-		// Solicitar contraseña
-		printf("Ingrese su contrasena: ");
-		fgets(usuario_ingresado.contrasena, 50, stdin);
-		usuario_ingresado.contrasena[strcspn(usuario_ingresado.contrasena, "\n")] = 0;
 		
-		// Abrir archivo para verificar si el usuario existe
-		archivo = fopen("Registros_usuarios.dat", "rb");
-		if (archivo == NULL) {
-			printf("\nNo hay usuarios registrados en el sistema.\n");
-			encontrado = 0;
-		} else {
-			while (fread(&usuario, sizeof(datos_registro), 1, archivo)) {
-				usuario.email[strcspn(usuario.email, "\n")] = 0;
-				usuario.contrasena[strcspn(usuario.contrasena, "\n")] = 0;
-				
-				if (strcmp(usuario.email, usuario_ingresado.email) == 0 && 
-					strcmp(usuario.contrasena, usuario_ingresado.contrasena) == 0) {
-					encontrado = 1;
-					break;
+	} else {
+		printf("\nUsuario no registrado. Pasando a registro...\n");
+		continuar();
+		pantalla_registro();
+	}
+}
+
+
+void pantalla_registro(){
+
+
+	
+FILE *archivo;
+
+
+
+archivo = fopen("registro.txt", "a");
+
+if (archivo == NULL) {
+	printf("Error al abrir archivo\n");
+	return;
+}
+
+
+
+printf("======PANTALLA DE REGISTRO======\n");
+
+printf("Ingrese su nombre: ");
+fgets(datos.nombre, sizeof(datos.nombre), stdin);
+limpiarSaltoLinea(datos.nombre);
+
+
+do{
+	
+	
+	printf("\nIngrese su email: ");
+	fgets(datos.email, sizeof(datos.email), stdin);
+	limpiarSaltoLinea(datos.email);
+	correo_detector = deteccion_correo(datos.email);
+}while(correo_detector == 0);
+
+
+printf("\nIngrese su contraseña: ");
+fgets(datos.contrasena, sizeof(datos.contrasena), stdin);
+limpiarSaltoLinea(datos.contrasena);
+
+
+int resultado;
+do {
+	printf("\nIngrese su edad: ");
+	resultado = scanf("%d", &datos.edad);
+} while (!validar_numeros(resultado));
+
+
+
+
+//variables para la validacion de la cedula//
+int validacion_cedula;
+int i; 
+
+do {
+	while (getchar() != '\n');// Asumimos que es válida al inicio
+	validacion_cedula = 1;
+	printf("\nIngrese su cedula (10 digitos): ");
+	fgets(datos.cedula, sizeof(datos.cedula), stdin);
+	limpiarSaltoLinea(datos.cedula);
+	
+	int longitud = strlen(datos.cedula);
+	
+	// --- LÓGICA DE VALIDACIÓN CON if/else if ---
+	if (longitud != 10) {
+		// Opción A: Error de longitud
+		printf("Error: La cedula debe tener exactamente 10 caracteres.\n");
+		
+		validacion_cedula = 0;
+		
+	} else {
+		// Opción B: Si tiene 10 caracteres, verificamos que sean números.
+		for (i = 0; i < 10; i++) {
+			if (!isdigit((unsigned char)datos.cedula[i])) {
+				printf("\nError: la cedula solo debe contener numeros.\n");
+				validacion_cedula = 0; // Marca como inválida
+				break; // Detenemos el for, ya encontramos un error
+			}
+		}
+	}
+	// --- Fin de la lógica ---
+	
+} while (validacion_cedula == 0);
+
+
+
+
+
+
+  do{
+printf("\ningrese el tipo de usuario 1. Paciente 2.Medico 3. Administrador: ");
+datos.tipo_usuario = leer_opcion(1, 3);
+	
+	
+
+  }while(datos.tipo_usuario < 1 || datos.tipo_usuario > 3);
+
+fprintf(archivo, "%s;%s;%s;%d;%s;%d\n", datos.nombre, datos.email, datos.contrasena, datos.edad, datos.cedula, datos.tipo_usuario);
+	
+fclose(archivo);
+
+if (datos.tipo_usuario == 2) { // MÉDICO
+	printf("\n=== REGISTRO DE MÉDICO ===\n");
+	
+	// 1. Agregar a medicos.txt
+	FILE *f_medico = fopen("medicos.txt", "a");
+	if (f_medico) {
+		fprintf(f_medico, "%s;%s;Sin especialidad asignada\n", 
+				datos.email, datos.nombre);
+		fclose(f_medico);
+		printf("? Registrado en medicos.txt\n");
+	}
+	
+	// 2. Agregar a doctores.txt (crear si no existe)
+	FILE *f_doctores = fopen("doctores.txt", "a+"); // a+ para leer y escribir, crear si no existe
+	
+	if (!f_doctores) {
+		printf("Error al crear archivo de doctores\n");
+	} else {
+		// Determinar el próximo ID disponible
+		int max_id = 0;
+		char linea[200];
+		int id_temp;
+		char nombre_temp[100], especialidad_temp[50], horario_temp[50];
+		int disponible_temp;
+		
+		rewind(f_doctores); // Ir al inicio para leer
+		
+		// Leer todas las líneas para encontrar el máximo ID
+		while (fgets(linea, sizeof(linea), f_doctores)) {
+			if (sscanf(linea, "%d;%[^;];%[^;];%[^;];%d",
+					   &id_temp, nombre_temp, especialidad_temp, horario_temp, &disponible_temp) == 5) {
+				if (id_temp > max_id) {
+					max_id = id_temp;
 				}
 			}
-			fclose(archivo);
 		}
 		
-		if (encontrado) {
-			printf("\n========================================\n");
-			printf("   ¡Inicio de sesión exitoso!\n");
-			printf("   Bienvenido/a, %s\n", usuario.nombre);
-			printf("========================================\n\n");
-			continuar();
-			
-			pantalla_pacientes();
-		} else {
-			printf("\n========================================\n");
-			printf("   Usuario no encontrado o credenciales incorrectas\n");
-			printf("========================================\n\n");
-			
-			printf("¿Desea registrarse? (S/N): ");
-			scanf(" %c", &opcion_registro);
-			limpiar_buffer_entrada();
-			
-			if (toupper(opcion_registro) == 'S') {
-				pantalla_registro_completo();
-			} else {
-				printf("\nRegreso al menú principal.\n");
-				continuar();
-			}
+		int nuevo_id = max_id + 1;
+		
+		// Preguntar especialidad al médico
+		int opcion_especialidad;
+		printf("\n=== SELECCIONAR ESPECIALIDAD ===\n");
+		printf("1. Medicina General\n");
+		printf("2. Psicologia\n");
+		printf("3. Traumatologia\n");
+		printf("Seleccione especialidad (1-3): ");
+		
+		opcion_especialidad = leer_opcion(1, 3);
+		
+		char especialidad[50];
+		char horario[50];
+		
+		switch(opcion_especialidad) {
+		case 1: 
+			strcpy(especialidad, "Medicina General");
+			strcpy(horario, "Lunes-Viernes 8:00-16:00");
+			break;
+		case 2: 
+			strcpy(especialidad, "Psicologia");
+			strcpy(horario, "Lunes-Jueves 9:00-17:00");
+			break;
+		case 3: 
+			strcpy(especialidad, "Traumatologia");
+			strcpy(horario, "Martes-Viernes 10:00-18:00");
+			break;
 		}
+		
+		// Preguntar horario personalizado
+		printf("\nHorario por defecto: %s\n", horario);
+		printf("¿Desea usar este horario? (s/n): ");
+		char opcion_horario = getchar();
+		while (getchar() != '\n'); // Limpiar buffer
+		
+		if (opcion_horario == 'n' || opcion_horario == 'N') {
+			printf("Ingrese su horario personalizado (ej: Lunes-Miercoles 8:00-12:00): ");
+			fgets(horario, sizeof(horario), stdin);
+			horario[strcspn(horario, "\n")] = 0;
+		}
+		
+		// Escribir el nuevo doctor en el archivo
+		fprintf(f_doctores, "%d;Dr. %s;%s;%s;1\n",
+				nuevo_id, datos.nombre, especialidad, horario);
+		
+		fclose(f_doctores);
+		
+		printf("\n? Doctor registrado exitosamente!\n");
+		printf("ID asignado: %d\n", nuevo_id);
+		printf("Nombre: Dr. %s\n", datos.nombre);
+		printf("Especialidad: %s\n", especialidad);
+		printf("Horario: %s\n", horario);
 	}
 	
-	void pantalla_registro_completo(void) {
-		FILE *Registros;
-		datos_registro nuevo_usuario;
-		char confirmar;
-		char temp_input[100];
-		
-		system("cls");
-		printf("\n========================================\n");
-		printf("        REGISTRO DE NUEVO USUARIO\n");
-		printf("========================================\n\n");
-		
-		// Generar ID automático
-		nuevo_usuario.id_paciente = obtener_ultimo_id() + 1;
-		printf("ID asignado automáticamente: %d\n\n", nuevo_usuario.id_paciente);
-		
-		// Solicitar y validar nombre
-		do {
-			printf("Ingrese su nombre completo: ");
-			fgets(nuevo_usuario.nombre, 100, stdin);
-			nuevo_usuario.nombre[strcspn(nuevo_usuario.nombre, "\n")] = 0;
-			
-			if (!validar_nombre(nuevo_usuario.nombre)) {
-				printf("Error: El nombre solo puede contener letras y espacios.\n");
-			}
-		} while (!validar_nombre(nuevo_usuario.nombre));
-		
-		// Solicitar y validar email
-		do {
-			printf("Ingrese su email: ");
-			fgets(nuevo_usuario.email, 100, stdin);
-			nuevo_usuario.email[strcspn(nuevo_usuario.email, "\n")] = 0;
-			
-			if (!validar_email(nuevo_usuario.email)) {
-				printf("Error: Email no válido. Formato: ejemplo@dominio.com\n");
-			}
-		} while (!validar_email(nuevo_usuario.email));
-		
-		// Solicitar y validar cédula
-		do {
-			printf("Ingrese su cédula (10 dígitos): ");
-			fgets(nuevo_usuario.cedula, 11, stdin);
-			nuevo_usuario.cedula[strcspn(nuevo_usuario.cedula, "\n")] = 0;
-			
-			// Limpiar buffer si se ingresaron más de 10 caracteres
-			if (strlen(nuevo_usuario.cedula) == 10 && getchar() != '\n') {
-				limpiar_buffer_entrada();
-			}
-			
-			if (!validar_cedula_ecuador(nuevo_usuario.cedula)) {
-				printf("Error: Cédula no válida. Debe tener 10 dígitos válidos para Ecuador.\n");
-			}
-		} while (!validar_cedula_ecuador(nuevo_usuario.cedula));
-		
-		// Solicitar y validar contraseña
-		do {
-			printf("Ingrese su contraseña (mínimo 6 caracteres): ");
-			fgets(nuevo_usuario.contrasena, 50, stdin);
-			nuevo_usuario.contrasena[strcspn(nuevo_usuario.contrasena, "\n")] = 0;
-			
-			if (!validar_contrasena(nuevo_usuario.contrasena)) {
-				printf("Error: La contraseña debe tener al menos 6 caracteres.\n");
-			}
-		} while (!validar_contrasena(nuevo_usuario.contrasena));
-		
-		// Mostrar resumen del registro
-		printf("\n========================================\n");
-		printf("          RESUMEN DEL REGISTRO\n");
-		printf("========================================\n");
-		printf("ID: %d\n", nuevo_usuario.id_paciente);
-		printf("Nombre: %s\n", nuevo_usuario.nombre);
-		printf("Email: %s\n", nuevo_usuario.email);
-		printf("Cédula: %s\n", nuevo_usuario.cedula);
-		printf("Contrasena: %s\n", nuevo_usuario.contrasena);
-		printf("========================================\n\n");
-		
-		// Confirmar registro
-		printf("¿Confirmar registro? (S/N): ");
-		scanf(" %c", &confirmar);
-		limpiar_buffer_entrada();
-		
-		if (toupper(confirmar) != 'S') {
-			printf("\nRegistro cancelado.\n");
-			continuar();
-			return;
-		}
-		
-		// Guardar en archivo
-		Registros = fopen("Registros_usuarios.dat", "ab");
-		if (Registros == NULL) {
-			printf("Error al abrir el archivo para guardar.\n");
-			continuar();
-			return;
-		}
-		
-		fwrite(&nuevo_usuario, sizeof(datos_registro), 1, Registros);
-		fclose(Registros);
-		
-		printf("\n========================================\n");
-		printf("   ¡REGISTRO EXITOSO!\n");
-		printf("========================================\n");
-		printf("Su usuario ha sido registrado con éxito.\n");
-		printf("Guarde su ID: %d\n", nuevo_usuario.id_paciente);
-		printf("========================================\n\n");
-		
-		continuar();
-		
-		// Iniciar sesión automáticamente
-		printf("Iniciando sesión automáticamente...\n");
-		continuar();
-		pantalla_pacientes();
-	}
+} else if (datos.tipo_usuario == 3) { // ADMINISTRADOR
+	printf("\n=== REGISTRO DE ADMINISTRADOR ===\n");
 	
-	// Ejemplo de menú principal
-	void menu_principal(void) {
-		int opcion;
+	FILE *f_admin = fopen("administradores.txt", "a");
+	if (f_admin) {
+		// Obtener fecha actual
+		time_t t = time(NULL);
+		struct tm *tm_info = localtime(&t);
+		char fecha_registro[20];
+		strftime(fecha_registro, 20, "%d/%m/%Y", tm_info);
 		
-		do {
-			system("cls");
-			printf("\n========================================\n");
-			printf("        SISTEMA DE PACIENTES\n");
-			printf("========================================\n");
-			printf("1. Iniciar sesión\n");
-			printf("2. Registrarse\n");
-			printf("3. Salir\n");
-			printf("========================================\n");
-			printf("Seleccione una opción: ");
-			
-			if (scanf("%d", &opcion) != 1) {
-				limpiar_buffer_entrada();
-				printf("Opción no válida.\n");
-				continuar();
-				continue;
-			}
-			limpiar_buffer_entrada();
-			
-			switch(opcion) {
-			case 1:
-				pantalla_registro();
-				break;
-			case 2:
-				pantalla_registro_completo();
-				break;
-			case 3:
-				printf("\n¡Hasta luego!\n");
-				break;
-			default:
-				printf("Opción no válida. Intente de nuevo.\n");
-				continuar();
-			}
-		} while(opcion != 3);
+		fprintf(f_admin, "%s;%s;%s;todos\n", 
+				datos.email, datos.nombre, fecha_registro);
+		fclose(f_admin);
+		printf("? Registrado en administradores.txt\n");
 	}
+}
+
+// ESTE ES EL MENSAJE FINAL QUE YA TENÍAS:
+printf("\n¡Registro completado exitosamente!!\n");
+printf("\nregistro guardado exitosamente!!\n");
+
+	
+}
+
 
 

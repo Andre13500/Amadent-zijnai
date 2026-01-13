@@ -1,2 +1,2 @@
-1;;1;1
-2;;1;1
+4;andres@;andres;1;Dr. andres dr;Medicina General;02/08/2026;14:30;dolor;cancelada;0
+2;andres@;andres;1;Dr. andres dr;Medicina General;02/08/2026;14:20;dolor;pendiente;1

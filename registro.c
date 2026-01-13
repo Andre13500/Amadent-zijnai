@@ -27,7 +27,6 @@ void iniciarSesion() {
 	
 	archivo = fopen("registro.txt", "r");
 	
-	// Si no existe el archivo ? registrar directo
 	if (archivo == NULL) {
 		pantalla_registro();
 		return;
@@ -46,47 +45,59 @@ void iniciarSesion() {
 	fgets(datos.contrasena, sizeof(datos.contrasena), stdin);
 	limpiarSaltoLinea(datos.contrasena);
 	
-	// BUSCAR EN ARCHIVO
+	// BUSCAR EN ARCHIVO - FORMATO CORREGIDO
 	while (fgets(linea, sizeof(linea), archivo)) {
-		sscanf(linea, "%*[^;];%[^;];%[^;];%*d;%*[^;];%d",
-			   temp.email,
-			   temp.contrasena,
-			   &temp.tipo_usuario);
+		linea[strcspn(linea, "\n")] = 0;
 		
-		if (strcmp(datos.email, temp.email) == 0 &&
-			strcmp(datos.contrasena, temp.contrasena) == 0) {
-			encontrado = 1;
-			break;
+		// Formato CORRECTO: nombre;email;contrasena;edad;cedula;tipo_usuario
+		if (sscanf(linea, "%[^;];%[^;];%[^;];%d;%[^;];%d",
+				   temp.nombre,
+				   temp.email,
+				   temp.contrasena,
+				   &temp.edad,
+				   temp.cedula,
+				   &temp.tipo_usuario) == 6) {
+			
+			if (strcmp(datos.email, temp.email) == 0 &&
+				strcmp(datos.contrasena, temp.contrasena) == 0) {
+				encontrado = 1;
+				
+				// Guardar email para usar después
+				strcpy(email_logueado, temp.email);
+				
+				break;
+			}
 		}
 	}
 	
 	fclose(archivo);
 	
-	// DECISIÓN FINAL
 	if (encontrado) {
 		printf("\nSesion iniciada correctamente\n");
 		pausar();
+		
 		switch (temp.tipo_usuario) {
 		case 1:
-			modulo_paciente(datos.email);
+			modulo_paciente(temp.email);  // ? CORREGIDO: usar temp.email
 			break;
 		case 2:
-			modulo_medico(datos.email);
+			modulo_medico(temp.email);    // ? CORREGIDO: usar temp.email
 			break;
 		case 3:
-			modulo_administrador(datos.email);
+			modulo_administrador(temp.email); // ? CORREGIDO: usar temp.email
 			break;
 		}
-		
-		
 	} else {
-		printf("\nUsuario no registrado. Pasando a registro...\n");
-		continuar();
-		pantalla_registro();
+		int opcion_registro;
+		printf("\nUsuario no registrado. desea reistrarse?? 1. SI // 2. NO \n");
+		opcion_registro = leer_opcion(1,2);
+		 if (opcion_registro == 1){
+		 continuar();
+		 pantalla_registro();}
+		 
+		
 	}
 }
-
-
 void pantalla_registro(){
 
 

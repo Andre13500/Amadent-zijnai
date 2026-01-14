@@ -36,7 +36,7 @@ int leer_opcion(int min, int max) {
 		resultado = scanf("%d", &opcion);
 		
 		if (!validar_numeros(resultado)) {
-			return;
+			continue;
 		}
 		
 		while (getchar() != '\n');
@@ -44,7 +44,7 @@ int leer_opcion(int min, int max) {
 		if (opcion < min || opcion > max) {
 			printf("Error: Opcion fuera de rango (%d a %d).\n", min, max);
 			continuar();
-			return;
+			continue;
 		}
 		
 		return opcion;

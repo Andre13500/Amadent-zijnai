@@ -1048,40 +1048,79 @@ void modificar_disponibilidad_doctor() {
 }
 
 
-void cancelar_cita_medico() {
+void cancelar_cita_medico(const char *email) {
 	FILE *f = fopen(ARCHIVO_CITAS, "r");
 	FILE *temp = fopen("temp_citas.txt", "w");
 	char linea[300];
 	int id_cancelar;
 	int encontrada = 0;
+	int doctor_id = obtener_id_doctor_por_email(email);
 	
 	if (!f || !temp) {
 		printf("Error al abrir archivos\n");
+		if (f) fclose(f);
+		if (temp) fclose(temp);
 		return;
 	}
 	
 	system("cls");
 	printf("=== CANCELAR CITA (MEDICO) ===\n\n");
 	
-	mostrar_todas_las_citas();
+	printf("Citas pendientes:\n");
+	printf("ID  | Paciente           | Fecha      | Hora   | Motivo\n");
+	printf("----|--------------------|------------|--------|--------\n");
+	
+	/* Primera pasada: mostrar citas pendientes */
+	while (fgets(linea, sizeof(linea), f)) {
+		int id, id_doc, activa;
+		char paciente_email[100], paciente_nombre[100];
+		char doctor_nombre[100], especialidad[50];
+		char fecha[20], hora[10], motivo[200], estado[20];
+		
+		if (sscanf(linea,
+				   "%d;%[^;];%[^;];%d;%[^;];%[^;];%[^;];%[^;];%[^;];%[^;];%d",
+				   &id, paciente_email, paciente_nombre, &id_doc,
+				   doctor_nombre, especialidad, fecha, hora,
+				   motivo, estado, &activa) == 11) {
+			
+			if (id_doc == doctor_id && activa == 1 && strcmp(estado, "pendiente") == 0) {
+				printf("%-3d | %-18s | %-10s | %-6s | %s\n",
+					   id, paciente_nombre, fecha, hora, motivo);
+			}
+		}
+	}
+	
 	printf("\nIngrese ID de la cita a cancelar: ");
-	scanf("%d", &id_cancelar);
+	if (scanf("%d", &id_cancelar) != 1) {
+		printf("ID inválido\n");
+		fclose(f);
+		fclose(temp);
+		return;
+	}
 	while (getchar() != '\n');
 	
+	/* Volver al inicio del archivo */
+	rewind(f);
+	
+	/* Segunda pasada: cancelar cita */
 	while (fgets(linea, sizeof(linea), f)) {
-		int id, doctor_id, activa;
+		int id, id_doc, activa;
 		char paciente_email[100], nombre_paciente[100];
 		char doctor_nombre[100], especialidad[50];
 		char fecha[20], hora[10], motivo[200], estado[20];
 		
-		if (sscanf(linea, "%d;%[^;];%[^;];%d;%[^;];%[^;];%[^;];%[^;];%[^;];%[^;];%d",
-				   &id, paciente_email, nombre_paciente, &doctor_id, doctor_nombre,
-				   especialidad, fecha, hora, motivo, estado, &activa) == 11) {
+		if (sscanf(linea,
+				   "%d;%[^;];%[^;];%d;%[^;];%[^;];%[^;];%[^;];%[^;];%[^;];%d",
+				   &id, paciente_email, nombre_paciente, &id_doc,
+				   doctor_nombre, especialidad, fecha, hora,
+				   motivo, estado, &activa) == 11) {
 			
-			if (id == id_cancelar) {
-				fprintf(temp, "%d;%s;%s;%d;%s;%s;%s;%s;%s;cancelada;0\n", 
-						id, paciente_email, nombre_paciente, doctor_id, doctor_nombre,
-						especialidad, fecha, hora, motivo);
+			if (id == id_cancelar && id_doc == doctor_id) {
+				fprintf(temp,
+						"%d;%s;%s;%d;%s;%s;%s;%s;%s;cancelada;0\n",
+						id, paciente_email, nombre_paciente,
+						id_doc, doctor_nombre, especialidad,
+						fecha, hora, motivo);
 				encontrada = 1;
 			} else {
 				fputs(linea, temp);
@@ -1103,3 +1142,4 @@ void cancelar_cita_medico() {
 	
 	pausar();
 }
+

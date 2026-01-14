@@ -141,10 +141,9 @@ int resultado;
 do {
 	printf("\nIngrese su edad: ");
 	resultado = scanf("%d", &datos.edad);
+	
 } while (!validar_numeros(resultado));
-
-
-
+	
 
 //variables para la validacion de la cedula//
 int validacion_cedula;
@@ -200,95 +199,77 @@ fclose(archivo);
 if (datos.tipo_usuario == 2) { // MÉDICO
 	printf("\n=== REGISTRO DE MÉDICO ===\n");
 	
-	// 1. Agregar a medicos.txt
-	FILE *f_medico = fopen("medicos.txt", "a");
-	if (f_medico) {
-		fprintf(f_medico, "%s;%s;Sin especialidad asignada\n", 
-				datos.email, datos.nombre);
-		fclose(f_medico);
-		printf("? Registrado en medicos.txt\n");
+	int opcion_especialidad;
+	char especialidad[50];
+	char horario[50];
+	
+	printf("\n=== SELECCIONAR ESPECIALIDAD ===\n");
+	printf("1. Medicina General\n");
+	printf("2. Psicologia\n");
+	printf("3. Traumatologia\n");
+	printf("Seleccione especialidad (1-3): ");
+	
+	opcion_especialidad = leer_opcion(1, 3);
+	
+	switch(opcion_especialidad) {
+	case 1:
+		strcpy(especialidad, "Medicina General");
+		strcpy(horario, "Lunes-Viernes 8:00-16:00");
+		break;
+	case 2:
+		strcpy(especialidad, "Psicologia");
+		strcpy(horario, "Lunes-Jueves 9:00-17:00");
+		break;
+	case 3:
+		strcpy(especialidad, "Traumatologia");
+		strcpy(horario, "Martes-Viernes 10:00-18:00");
+		break;
 	}
 	
-	// 2. Agregar a doctores.txt (crear si no existe)
-	FILE *f_doctores = fopen("doctores.txt", "a+"); // a+ para leer y escribir, crear si no existe
+	printf("\nHorario por defecto: %s\n", horario);
+	printf("¿Desea usar este horario? (s/n): ");
+	char opcion_horario = getchar();
+	while (getchar() != '\n');
 	
-	if (!f_doctores) {
-		printf("Error al crear archivo de doctores\n");
-	} else {
-		// Determinar el próximo ID disponible
+	if (opcion_horario == 'n' || opcion_horario == 'N') {
+		printf("Ingrese su horario personalizado: ");
+		fgets(horario, sizeof(horario), stdin);
+		horario[strcspn(horario, "\n")] = '\0';
+	}
+	
+	/* ===== GUARDAR EN MEDICOS.TXT (YA CON ESPECIALIDAD REAL) ===== */
+	FILE *f_medico = fopen("medicos.txt", "a");
+	if (f_medico) {
+		fprintf(f_medico, "%s;%s;%s\n",
+				datos.email, datos.nombre, especialidad);
+		fclose(f_medico);
+	}
+	
+	/* ===== GUARDAR EN DOCTORES.TXT ===== */
+	FILE *f_doctores = fopen("doctores.txt", "a+");
+	if (f_doctores) {
 		int max_id = 0;
 		char linea[200];
-		int id_temp;
+		int id_temp, disponible_temp;
 		char nombre_temp[100], especialidad_temp[50], horario_temp[50];
-		int disponible_temp;
 		
-		rewind(f_doctores); // Ir al inicio para leer
+		rewind(f_doctores);
 		
-		// Leer todas las líneas para encontrar el máximo ID
 		while (fgets(linea, sizeof(linea), f_doctores)) {
 			if (sscanf(linea, "%d;%[^;];%[^;];%[^;];%d",
-					   &id_temp, nombre_temp, especialidad_temp, horario_temp, &disponible_temp) == 5) {
-				if (id_temp > max_id) {
-					max_id = id_temp;
-				}
+					   &id_temp, nombre_temp, especialidad_temp,
+					   horario_temp, &disponible_temp) == 5) {
+				if (id_temp > max_id) max_id = id_temp;
 			}
 		}
 		
-		int nuevo_id = max_id + 1;
-		
-		// Preguntar especialidad al médico
-		int opcion_especialidad;
-		printf("\n=== SELECCIONAR ESPECIALIDAD ===\n");
-		printf("1. Medicina General\n");
-		printf("2. Psicologia\n");
-		printf("3. Traumatologia\n");
-		printf("Seleccione especialidad (1-3): ");
-		
-		opcion_especialidad = leer_opcion(1, 3);
-		
-		char especialidad[50];
-		char horario[50];
-		
-		switch(opcion_especialidad) {
-		case 1: 
-			strcpy(especialidad, "Medicina General");
-			strcpy(horario, "Lunes-Viernes 8:00-16:00");
-			break;
-		case 2: 
-			strcpy(especialidad, "Psicologia");
-			strcpy(horario, "Lunes-Jueves 9:00-17:00");
-			break;
-		case 3: 
-			strcpy(especialidad, "Traumatologia");
-			strcpy(horario, "Martes-Viernes 10:00-18:00");
-			break;
-		}
-		
-		// Preguntar horario personalizado
-		printf("\nHorario por defecto: %s\n", horario);
-		printf("¿Desea usar este horario? (s/n): ");
-		char opcion_horario = getchar();
-		while (getchar() != '\n'); // Limpiar buffer
-		
-		if (opcion_horario == 'n' || opcion_horario == 'N') {
-			printf("Ingrese su horario personalizado (ej: Lunes-Miercoles 8:00-12:00): ");
-			fgets(horario, sizeof(horario), stdin);
-			horario[strcspn(horario, "\n")] = 0;
-		}
-		
-		// Escribir el nuevo doctor en el archivo
 		fprintf(f_doctores, "%d;Dr. %s;%s;%s;1\n",
-				nuevo_id, datos.nombre, especialidad, horario);
+				max_id + 1, datos.nombre, especialidad, horario);
 		
 		fclose(f_doctores);
-		
-		printf("\n? Doctor registrado exitosamente!\n");
-		printf("ID asignado: %d\n", nuevo_id);
-		printf("Nombre: Dr. %s\n", datos.nombre);
-		printf("Especialidad: %s\n", especialidad);
-		printf("Horario: %s\n", horario);
 	}
 	
+	printf("\nDoctor registrado exitosamente\n");
 } else if (datos.tipo_usuario == 3) { // ADMINISTRADOR
 	printf("\n=== REGISTRO DE ADMINISTRADOR ===\n");
 	
@@ -307,7 +288,6 @@ if (datos.tipo_usuario == 2) { // MÉDICO
 	}
 }
 
-// ESTE ES EL MENSAJE FINAL QUE YA TENÍAS:
 printf("\n¡Registro completado exitosamente!!\n");
 printf("\nregistro guardado exitosamente!!\n");
 

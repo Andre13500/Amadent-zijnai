@@ -81,7 +81,7 @@ void modulo_medico() {
 			completar_cita_doctor(email_logueado);
 			break;
 		case 4:
-			cancelar_cita_medico();
+			cancelar_cita_medico(email_logueado);
 			break;
 		case 5:
 			printf("Volviendo al menu principal...\n");

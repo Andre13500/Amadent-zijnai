@@ -6,7 +6,7 @@
 
 
 
-
+void iniciarSesion();
 int main()
 {
 int opcion_menu1 = 0;
